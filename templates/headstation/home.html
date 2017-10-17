@@ -5,41 +5,97 @@
         <title>Homepage</title>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
-
-
-        
+        {% csrf_token %}
+        <script type="text/javascript">
+        	// for use in ajax requests
+			var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
+		</script>
     </head>
 
     <body>
-        <h1>Home</h1>
+        <h1>{{ buildingName }}</h1>
         Hello, message: <strong>{{ boldmessage }}</strong><br />
-        <a href="/rango/about/">Link to another page</a><br />
+        <a href="/another-page/">Link to another page</a><br />
 
         <h1>Chart</h1>
         <canvas id="testChart" style="display: block; width: 300px; height: 100px;"></canvas>
-
 		<script>
-			var timeArray = [0,10,20,30,40,50,60];
-			var dataArray = [25.0,24.2,25,24.0,24.5,25.1,25.5]
-        	var ctx = document.getElementById('testChart').getContext('2d');
-			var chart = new Chart(ctx, {
-    			// The type of chart we want to create
-    			type: 'line',
+			// empty arrays for data
+			var timeArray = [];
+			var dataArray = [];
 
-    			// The data for our dataset
-    			data: {
-        			labels: timeArray,
-        			datasets: [{
-            			label: "My First dataset",
-            			backgroundColor: 'transparent',
-            			borderColor: 'rgb(255, 99, 132)',
-            			data: dataArray,
-        			}]
-    			},
+			function csrfSafeMethod(method) {
+			// methods not requiring csrf protection
+				return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+			}
+			// setup of aja - set headers for csrf
+			$.ajaxSetup({
+				beforeSend: function(xhr, settings) {
+					if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+						xhr.setRequestHeader("X-CSRFToken", csrftoken);
+					}
+				}
+			});
+			// ajax request to update graph
+			$.ajax({
+        		url: 'chart_data/',
+        		type:"POST",
+        		data: {
+          			'action': 'getData',
+        		},
+        		dataType: 'json',
+       			success: function (data) {
+       				//if there is new data
+          			if (data) {
+          				timeArray = data.x;
+          				dataArray = data.y;
+          				console.log(data.test);
+          				//get chart canvas for plotting
+            			var ctx = document.getElementById('testChart').getContext('2d');
+            			// plot chart.js chart
+						var chart = new Chart(ctx, {
+    						type: 'line',
+    						// format chart data
+    						data: {
+        						labels: timeArray,
+        						datasets: [{
+            						label: "example",
+            						backgroundColor: 'red',
+            						borderColor: 'red',
+            						data: dataArray,
+            						lineTension: 0,
+            						fill: false,
+        						}]
+    						},
 
-		    	// Configuration options go here
-    			options: {}
-				});
+		    				// graph options, set axes etc
+    						options: {
+    							responsive: true,
+    							tooltips: {
+    								position: 'nearest',
+    								mode: 'index',
+    								intersect: false,
+    							},
+    							scales: {
+    								yAxes: [{
+    									display: true,
+    									scaleLabel: {
+    										display: true,
+    										labelString: 'temperature'
+    									},
+    									ticks: {
+    										suggestedMin: 10,
+    										suggestedMax: 40,
+    									}
+    								}]
+    							}
+    						}
+						});
+          			}
+        		}
+      		});
+
+        	
 		</script>
 
     </body>
