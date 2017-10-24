@@ -47,9 +47,9 @@
        			success: function (data) {
        				//if there is new data
           			if (data) {
-          				timeArray = data.x;
-          				dataArray = data.y;
-          				console.log(data.test);
+          				timeArray = data.data.time;
+          				dataArray = data.data.value;
+          				console.log(data.errors);
           				//get chart canvas for plotting
             			var ctx = document.getElementById('testChart').getContext('2d');
             			// plot chart.js chart

@@ -4,6 +4,9 @@ from django.template import RequestContext
 from django.views.decorators.csrf import csrf_exempt
 
 from .models import TemperatureReading, HumidityReading, co2Reading
+
+import json
+
 # REMEBER
 # django view = MVC controller
 # django templates = MVC view
@@ -19,10 +22,22 @@ def index(request):
 	return render_to_response('headstation/home.html', context_dict, context)
 
 # upload data from a node to the db
+@csrf_exempt
 def upload_data(request):
 	if (request.method == 'POST'):
-		if (request.POST.get('action') == 'uploadData'):
-			pass
+		data = json.loads(request.body.decode("utf-8"))
+		if (data['action'] == 'uploadData'):
+			# create temperature object, save to database
+			temperature = data['temperature']
+			newReading = TemperatureReading(sensor_id = 1, temperature = temperature)
+			newReading.save()
+
+			response = {"status": "success"}
+		else:
+			response = {"status": "oh no"}
+
+		return JsonResponse(response)
+			
 			#get data from request
 	return
 
@@ -40,17 +55,23 @@ def chart_data(request):
 			timeData = [i.date_time for i in temperatureObj]
 			temperatureData = [i.temperature for i in temperatureObj]
 
-			time = [0,10,20,30,40,50,60]
-			dataY = [26.0,23.2,25,24.0,24.5,27.1,25.5]
+			#time = [0,10,20,30,40,50,60]
+			#dataY = [26.0,23.2,25,24.0,24.5,27.1,25.5]
+			# data json
+			data = {"time": timeData,
+					"value": temperatureData}
+			errors = []
 
-			response = {"x": time,
-						"y": dataY,
-						"test": temperatureData}
+			response = {
+						"status": "okay",
+						"errors": errors,
+						"data": data
+						}
 
 		# get only new data from db
 		elif (request.action == 'updateData'):
-			time = []
-			dataX = []
+			# get new data into objects
+			temperatureObj = TemperatureReading.objects.all()
 	else:
 		response = {"x": "no",
 					"y": "no"}

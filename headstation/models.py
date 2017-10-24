@@ -18,7 +18,7 @@ class TemperatureReading(models.Model):
 	date_time = models.DateTimeField(auto_now=False, auto_now_add=False).default = datetime.today()
 	temperature = models.DecimalField(max_digits=10, decimal_places=2)
 
-	def __unicode__(self):
+	def __str__(self):
 		return self.measurement_id
 
 class HumidityReading(models.Model):
@@ -27,7 +27,7 @@ class HumidityReading(models.Model):
 	date_time = models.DateTimeField(auto_now=False, auto_now_add=False).default = datetime.today()
 	humidity = models.DecimalField(max_digits=10, decimal_places=2)
 
-	def __unicode__(self):
+	def __str__(self):
 		return self.measuremnt_id
 
 class co2Reading(models.Model):
@@ -36,7 +36,7 @@ class co2Reading(models.Model):
 	date_time = models.DateTimeField(auto_now=False, auto_now_add=False).default = datetime.today()
 	co2 = models.DecimalField(max_digits=10, decimal_places=2)
 
-	def __unicode__(self):
+	def __str__(self):
 		return self.measuremnt_id
 
 # log all errors for monitoring and correcting
@@ -51,7 +51,7 @@ class ErrorLog(models.Model):
 
 
 
-	def __unicode__(self):
+	def __str__(self):
 		return self.error_id
 
 
